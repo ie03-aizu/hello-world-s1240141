@@ -1,4 +1,5 @@
 #include<iostream>
+#include<sstream>
 #include<vector>
 #include<complex>
 #include<iterator>
@@ -99,18 +100,42 @@ int main(){
   */
 
 
-  int ie;
-  std::string command;
+  // commandによる動作処理
   
-  while( std::cin >> command ){
-    
-    if( std::equal(command.begin(), command.end(), "rec") ){
-      int x;
-      std::string y;
-      std::cin >> x >> y;
+  std::string command;
+  std::vector<std::string> v;
 
+  std::cin.ignore();
+  
+  while( getline(std::cin, command) ){
+
+    std::stringstream ss(command);
+    std::string buf;
+
+    while(std::getline(ss, buf, ' ')){
+      v.push_back(buf);
+    }
+   
+    std::string::size_type a = 0;
+    std::string::size_type b = 0;
+    
+    //recの処理
+    a = command.find("rec");
+   
+    if( a != std::string::npos ){
+
+      if(!(v.size() == 2 || v.size() == 3)){
+	std::cout << "Error! Usage: \"rec UserNo.\" or \"rec UserNo. RecommendedItemsNo.\" " << std::endl;
+	v.clear();
+	continue;
+      }
+      
+      int x = atoi(v[1].c_str());
+      int y;    
+      
       if(x<1 || N<x){
 	std::cout << "user not found." << std::endl;
+	v.clear();
 	continue;
       }
 
@@ -128,34 +153,74 @@ int main(){
       }
 
       if(Items.size() == 0){
-	std::cout << "no appropriate item." << std::endl;
+	std::cout << "No appropriate item." << std::endl;
+	v.clear();
 	continue;
       }
        
       mergeSort(Items.begin(), Items.end(), 0, Items.size());
-
-
-      if(y == "\n"){
+      
+      if(v.size() == 2){
 	for( int i=0 ; i < Items.size() ; i++ ){
 	  std::cout << Items[i].get_num() << " " << Items[i].get_rec() << std::endl;
 	}
       }
-
       
       else{
-	int z = atoi(y);
-	
-	std::cout << Items[z-1].get_num() << " " << Items[z-1].get_rec() << std::endl;
+	y = atoi(v[2].c_str());
+
+	if(y<1 || Items.size()<y){
+	  std::cout << "UserNo." << x << " is recommended " << Items.size() << " items."<< std::endl;
+	  v.clear();
+	  continue;
+	}
+	std::cout << Items[y-1].get_num() << " " << Items[y-1].get_rec() << std::endl;
       } 
       
     }
 
-    else if( std::equal(command.begin(), command.end(), "eval") ){
-      int x, y;
-      double z;
+
+    // evalの処理
+    b = command.find("eval");
+
+    if( b != std::string::npos ){
+
+      if(v.size() != 4){
+	std::cout << "Error! Usage: \"val UserNo. BookNo. EvaluationValue\"" << std::endl;
+	v.clear();
+	continue;
+      }
       
-      User[x-1].set_Books(y, z);
+      int x = atoi(v[1].c_str());
+      int y = atoi(v[2].c_str());
+      double z = atof(v[3].c_str());
+
+      if(x<1 || N<x){
+	std::cout << "user not found." << std::endl;
+	v.clear();
+	continue;
+      }
+      if(y<1 || M<y){
+	std::cout << "book not found." << std::endl;
+	v.clear();
+	continue;
+      }
+      if(z<0 || 5<z){
+	std::cout << "Error! Evaluation range is 0.0 to 5.0" << std::endl;
+	v.clear();
+	continue;
+      }
+      User[x-1].set_Books(y-1, z);
     }
+
+
+    // 例外処理
+    if(a == std::string::npos && b == std::string::npos ){
+      std::cout << "Error! Such a command dose not exist!" << std::endl;
+    }
+    
+    command.clear();
+    v.clear();
   }
 
   
