@@ -98,6 +98,8 @@ int main(){
   }
   */
 
+
+  int ie;
   std::string command;
   
   while( std::cin >> command ){
