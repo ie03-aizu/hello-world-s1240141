@@ -11,21 +11,21 @@ int R;  //友好関係数
 class Userinfo{
 public:
   Userinfo();                                             // デフォルトコンストラクタ
-  Userinfo(int, int, int);                                // コンストラクタ
+  Userinfo(int, int);                                     // コンストラクタ
   void set_num( int x ){ num = x;}                        // 何人目のユーザーかの設定
   void set_Books( int x, double y ){ Booksinfo[x] = y; }  // int 番目の本の評価の設定
   void set_Evaluate( double x){ evaluate = x;}            // 手動での評価設定
-  void set_Friends(int x){Friends[x] = 1;}                // x番目のユーザーと友人関係であることの設定
+  void set_groupe(int x){groupe = x;}                     // ユーザーのグループ番号の設定
   void Evaluate(Userinfo);                                // 類似性評価用
   
-  double getevaluate(){return evaluate;}                  // 類似性のデータ取得
+  double get_evaluate(){return evaluate;}                  // 類似性のデータ取得
   double getBooks(int x){return Booksinfo[x];}            // x番目の本に対する評価の取得
   int get_num(){return num;}                              // numのデータ取得
-  int get_Friends(int x){return Friends[x];}              // x番目のユーザーとの友好関係の取得
+  int get_groupe(){return groupe;}                        // ユーザーのグループ番号の取得
  
 private:
   std::vector<double> Booksinfo;  // 書籍の情報
-  std::vector<int> Friends;       // 有効関係の登録 1ならtrue, 0ならfalse
+  int groupe;                     // グループ(友人関係の振り分け)
   int num;                        // 何番目の人物か
   double evaluate;                // ユーザー1との類似性の評価
 };
@@ -74,25 +74,35 @@ int main(){
   }
 
   std::cin >> R;            //友好関係数の登録
+  int j=0;
 
+  //グループ(友人関係)の登録
   for( int i=0 ; i<R ; ++i ){
     std::cin >> num >> friend_num;
-    
-    User[num-1].set_Friends(friend_num-1);
-    User[friend_num-1].set_Friends(num-1);
-  }  
-  
+
+    if(User[num-1].get_groupe() == 0 && User[friend_num-1].get_groupe() == 0){
+      j++;
+      User[num-1].set_groupe(j);
+      User[friend_num-1].set_groupe(j);
+    }
+    else if(User[num-1].get_groupe() != 0){
+      User[friend_num-1].set_groupe(User[num-1].get_groupe());
+    }
+    else if(User[friend_num-1].get_groupe() != 0){
+      User[num-1].set_groupe(User[friend_num-1].get_groupe());
+    }
+  }
+
+ 
    // ユーザーnumに対する全ユーザーの全書籍に対する評価計算
   num = 1;
   for( int i=0 ; i < N ; ++i ){
     if( i == num-1 ) continue;
-    User[i].Evaluate(User[num-1]); 
+    User[i].Evaluate(User[num-1]);
+    std::cout << "User" << i+1 << " : " << User[i].get_evaluate() << std::endl;
   }
-  
-  std::cout << "user2" << " : " << User[1].getevaluate() << std::endl;
-  std::cout << "user4" << " : " << User[3].getevaluate() << std::endl;
-  std::cout << "user6" << " : " << User[5].getevaluate() << std::endl;
-  
+
+
   // ユーザーnumに対するアイテムの推薦
   num = 1;
   for( int i=0 ; i < M ; ++i ){
@@ -123,13 +133,13 @@ int main(){
 // デフォルトコンストラクタ
 Userinfo::Userinfo(){
   Booksinfo.push_back(-1);
-  Friends.push_back(0);
+  groupe = 0;
   num = 0;
   evaluate = 0;
 }
 
 // コンストラクタ
-Userinfo::Userinfo( int x, int y, int z ){
+Userinfo::Userinfo( int x, int y ){
   num = x;
 
   // 本の情報の初期化
@@ -138,9 +148,7 @@ Userinfo::Userinfo( int x, int y, int z ){
   }
 
   // 友人関係の初期化
-  for( int i=0 ; i < z ; ++i ){
-    Friends.push_back(0);
-  }
+  groupe = 0;
 }
 
 // u1との類似性評価関数
@@ -156,7 +164,8 @@ void Userinfo::Evaluate(Userinfo u1){
     sum += x*x; 
   }
 
-  if(sum == 0) evaluate = 0;
+  if(sum == 0 && x != 0) evaluate = 0;
+  else if(sum == 0 && x == 0) evaluate = 1;
   else evaluate =  1/(std::sqrt(sum)+1);
 }
 
@@ -169,11 +178,9 @@ void Recitem::F_Recommendation( std::vector<Userinfo> U, int x ){
   for( int i = 0 ; i < N ; i++ ){
     if( i == x )continue;
     
-    if( U[i].getBooks(num-1) != -1 && U[x].get_Friends(i) == 1){
-      
-      //std::cout << num << ":" << i+1 << std::endl;
-      S += U[i].getevaluate() * U[i].getBooks(num-1);
-      A += U[i].getevaluate();
+    if( U[i].getBooks(num-1) != -1 && U[x].get_groupe() == U[i].get_groupe()){
+      S += U[i].get_evaluate() * U[i].getBooks(num-1);
+      A += U[i].get_evaluate();
     }
   }
 
@@ -186,7 +193,7 @@ std::vector<Userinfo> MakeList(int x, int y){
   std::vector<Userinfo> List;
 
   for( int i=0 ; i < x ; ++i ){
-    Userinfo userinfo(i+1, y, x);
+    Userinfo userinfo(i+1, y);
     List.push_back(userinfo);
   }
 
