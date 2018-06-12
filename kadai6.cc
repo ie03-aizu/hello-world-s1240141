@@ -2,6 +2,9 @@
 #include<vector>
 #include<complex>
 #include<iterator>
+#include<string>
+#include<algorithm>
+#include<stack>
 
 int N;  //User数
 int M;  //書籍数
@@ -18,7 +21,7 @@ public:
   void set_groupe(int x){groupe = x;}                     // ユーザーのグループ番号の設定
   void Evaluate(Userinfo);                                // 類似性評価用
   
-  double get_evaluate(){return evaluate;}                  // 類似性のデータ取得
+  double get_evaluate(){return evaluate;}                 // 類似性のデータ取得
   double getBooks(int x){return Booksinfo[x];}            // x番目の本に対する評価の取得
   int get_num(){return num;}                              // numのデータ取得
   int get_groupe(){return groupe;}                        // ユーザーのグループ番号の取得
@@ -56,9 +59,16 @@ void merge(std::vector<Recitem>::iterator, int, int, int);
 std::vector<Userinfo> User;
 std::vector<Recitem> Items;
 
+
+static const int MAX = 100000;
+std::vector<int> G[MAX];
+
+void dfs(int, int);        //深さ優先探索
+void assignGroupe(int);    
+
 int main(){
 
-  int num, book, friend_num;
+  int num, book;
   double eval;
   
   std::cin >> N >> M >> E;  //User数と書籍数と評価数の登録
@@ -73,33 +83,29 @@ int main(){
     User[num-1].set_Books( book-1, eval );
   }
 
-  std::cin >> R;            //友好関係数の登録
-  int j=0;
+  // ==============
+  //友人関係の登録
+  std::cin >> R;    
 
-  //グループ(友人関係)の登録
+  //友人情報の入力
   for( int i=0 ; i<R ; ++i ){
-    std::cin >> num >> friend_num;
-
-    if(User[num-1].get_groupe() == 0 && User[friend_num-1].get_groupe() == 0){
-      j++;
-      User[num-1].set_groupe(j);
-      User[friend_num-1].set_groupe(j);
-    }
-    else if(User[num-1].get_groupe() != 0){
-      User[friend_num-1].set_groupe(User[num-1].get_groupe());
-    }
-    else if(User[friend_num-1].get_groupe() != 0){
-      User[num-1].set_groupe(User[friend_num-1].get_groupe());
-    }
+    int s,t;                // (仮)ユーザs, (仮)ユーザt  
+    std::cin >> s >> t;
+    G[s-1].push_back(t);
+    G[t-1].push_back(s);
   }
 
- 
+  //グループ化
+  assignGroupe(N);
+
+  //===============
+
+  
    // ユーザーnumに対する全ユーザーの全書籍に対する評価計算
   num = 1;
   for( int i=0 ; i < N ; ++i ){
     if( i == num-1 ) continue;
     User[i].Evaluate(User[num-1]);
-    std::cout << "User" << i+1 << " : " << User[i].get_evaluate() << std::endl;
   }
 
 
@@ -243,4 +249,30 @@ void merge(std::vector<Recitem>::iterator first, int L, int M, int R){
       j++;
     }
   } 
+}
+
+// 深さ優先探索
+void dfs(int n, int c){
+  std::stack<int> s;
+  s.push(n);
+  User[n].set_groupe(c);
+
+  while(!s.empty()){
+    int u = s.top();
+    s.pop();
+    for( int i=0 ; i<G[u].size() ; i++ ){
+      int v = G[u][i];
+      if(User[v-1].get_groupe() == 0){
+	User[v-1].set_groupe(c);
+	s.push(v-1);
+      }
+    }
+  }
+}
+// グループ化
+void assignGroupe(int n){
+  int id = 1;
+  for( int i=0 ; i<n ; i++ ){
+    if(User[i].get_groupe() == 0)dfs(i, id++);
+  }
 }
