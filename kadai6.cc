@@ -18,17 +18,17 @@ public:
   void set_num( int x ){ num = x;}                        // 何人目のユーザーかの設定
   void set_Books( int x, double y ){ Booksinfo[x] = y; }  // int 番目の本の評価の設定
   void set_Evaluate( double x){ evaluate = x;}            // 手動での評価設定
-  void set_groupe(int x){groupe = x;}                     // ユーザーのグループ番号の設定
+  void set_group(int x){group = x;}                     // ユーザーのグループ番号の設定
   void Evaluate(Userinfo);                                // 類似性評価用
   
   double get_evaluate(){return evaluate;}                 // 類似性のデータ取得
   double getBooks(int x){return Booksinfo[x];}            // x番目の本に対する評価の取得
   int get_num(){return num;}                              // numのデータ取得
-  int get_groupe(){return groupe;}                        // ユーザーのグループ番号の取得
+  int get_group(){return group;}                        // ユーザーのグループ番号の取得
  
 private:
   std::vector<double> Booksinfo;  // 書籍の情報
-  int groupe;                     // グループ(友人関係の振り分け)
+  int group;                     // グループ(友人関係の振り分け)
   int num;                        // 何番目の人物か
   double evaluate;                // ユーザー1との類似性の評価
 };
@@ -38,7 +38,7 @@ public:
   Recitem(){num = 0; rec = 0;}                          // デフォルトコンストラクタ
   Recitem(int x, double j){ num = x; rec = j; }         // コンストラクタ
   void set_num( int x ){ num = x; }                     // int番目の本と設定
-  void F_Recommendation( std::vector<Userinfo>,int  x );// 友人関係を考慮したint番目のユーザーに対するオススメ度の計算
+  void F_Recommendation( std::vector<Userinfo>,int );// 友人関係を考慮したint番目のユーザーに対するオススメ度の計算
   
   int get_num(){return num;}
   double get_rec(){return rec;}
@@ -64,7 +64,7 @@ static const int MAX = 100000;
 std::vector<int> G[MAX];
 
 void dfs(int, int);        //深さ優先探索
-void assignGroupe(int);    
+void assignGroup(int);    
 
 int main(){
 
@@ -96,7 +96,7 @@ int main(){
   }
 
   //グループ化
-  assignGroupe(N);
+  assignGroup(N);
 
   //===============
 
@@ -139,7 +139,7 @@ int main(){
 // デフォルトコンストラクタ
 Userinfo::Userinfo(){
   Booksinfo.push_back(-1);
-  groupe = 0;
+  group = 0;
   num = 0;
   evaluate = 0;
 }
@@ -154,7 +154,7 @@ Userinfo::Userinfo( int x, int y ){
   }
 
   // 友人関係の初期化
-  groupe = 0;
+  group = 0;
 }
 
 // u1との類似性評価関数
@@ -184,7 +184,7 @@ void Recitem::F_Recommendation( std::vector<Userinfo> U, int x ){
   for( int i = 0 ; i < N ; i++ ){
     if( i == x )continue;
     
-    if( U[i].getBooks(num-1) != -1 && U[x].get_groupe() == U[i].get_groupe()){
+    if( U[i].getBooks(num-1) != -1 && U[x].get_group() == U[i].get_group()){
       S += U[i].get_evaluate() * U[i].getBooks(num-1);
       A += U[i].get_evaluate();
     }
@@ -255,24 +255,24 @@ void merge(std::vector<Recitem>::iterator first, int L, int M, int R){
 void dfs(int n, int c){
   std::stack<int> s;
   s.push(n);
-  User[n].set_groupe(c);
+  User[n].set_group(c);
 
   while(!s.empty()){
     int u = s.top();
     s.pop();
     for( int i=0 ; i<G[u].size() ; i++ ){
       int v = G[u][i];
-      if(User[v-1].get_groupe() == 0){
-	User[v-1].set_groupe(c);
+      if(User[v-1].get_group() == 0){
+	User[v-1].set_group(c);
 	s.push(v-1);
       }
     }
   }
 }
 // グループ化
-void assignGroupe(int n){
+void assignGroup(int n){
   int id = 1;
   for( int i=0 ; i<n ; i++ ){
-    if(User[i].get_groupe() == 0)dfs(i, id++);
+    if(User[i].get_group() == 0)dfs(i, id++);
   }
 }
