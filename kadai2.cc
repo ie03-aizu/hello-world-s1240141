@@ -153,7 +153,10 @@ void Userinfo::Evaluate(Userinfo u1){
     sum += x*x; 
   }
 
-  evaluate =  1/(std::sqrt(sum)+1);
+  if(sum == 0 && x == 1) evaluate = 0;
+  else if(sum == 0 && x == 0) evaluate = 1;
+  else evaluate =  1/(std::sqrt(sum)+1);
+  
 }
 
 
