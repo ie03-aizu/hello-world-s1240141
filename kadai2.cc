@@ -144,7 +144,7 @@ void Userinfo::set_num( int x ){
 void Userinfo::Evaluate(Userinfo u1){
 
   double sum=0;
-  double x;
+  double x=1;
  
   for( int j=0 ; j<M ; ++j ){
     if(Booksinfo[j] == -1 || u1.getBooks(j) == -1) continue;
