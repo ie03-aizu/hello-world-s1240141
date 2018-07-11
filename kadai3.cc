@@ -209,7 +209,10 @@ void Userinfo::Evaluate(Userinfo u1){
     sum += x*x; 
   }
 
-  evaluate =  1/(std::sqrt(sum)+1);
+
+  if(sum == 0 && x == 1) evaluate = 0;
+  else if(sum == 0 && x == 0) evaluate = 1;
+  else evaluate =  1/(std::sqrt(sum)+1);
 }
 
 
@@ -225,7 +228,8 @@ void Recitem::Recommendation( std::vector<Userinfo> U ){
     }
   }
 
-  rec = S/A;
+  if(S == 0 && A == 0) rec = 0;
+  else rec = S/A;
 }
 
 // マージソート
