@@ -9,10 +9,9 @@
   % g++ -std=c++11 generatorForEx3.cc
 
   #Index
-  in3-1: 昇順に出力
-  in3-2: 順番に関係なく出力、限界値(ユーザ数=100000、書籍数=100000、評価数=100000)
-  in3-3: 特定の1冊を避けて出力
-  in3-4: 特定の1人を避けて出力
+  in3-1: 順番に関係なく出力、限界値(ユーザ数=100000、書籍数=100000、評価数=100000)
+  in3-2: 特定の1冊を避けて出力
+  in3-3: 特定の1人を避けて出力
  */
 
 //管理用クラス
@@ -102,7 +101,7 @@ double RangedRand( const double& a, const double& b ) {
   std::uniform_real_distribution<double> rangedGen( a, b );
   return rangedGen(mt);
 }
-
+/* ####ボツ
 //昇順に出力する生成器
 void AscendingOrder( const char* filename, int n, int m, int e ) {
   int u, b; // userNo. & bookNo.
@@ -134,7 +133,7 @@ void AscendingOrder( const char* filename, int n, int m, int e ) {
   }
   fclose( fpOut );
 }
-
+*/
 //ランダムに出力する生成器
 void NoOrder( const char* filename, int n, int m, int e ) {
   int u, b; // userNo. & bookNo.
@@ -156,45 +155,63 @@ void NoOrder( const char* filename, int n, int m, int e ) {
   fclose( fpOut );
 }
 
-/*
+
 //col番目だけ全員未評価のデータ生成器
-void UnevaluatedColumn( const char* filename, int n, int m, int col ) {
+void UnevaluatedColumn( const char* filename, int n, int m, int e, int col ) {
+  int u, b; // userNo. & bookNo.
+  list.clear();
+  Makelist(n);
   FILE* fpOut = fopen( filename, "w" );
-  fprintf( fpOut, "%d %d\n", n, m );
-  for ( int i=0; i<n; ++i ) {
-    for ( int j=0; j<m; ++j ) {
-      if ( j == col )
-	fprintf( fpOut, "-1.0%c", j == m-1 ? '\n' : ' ' );
-      else
-	fprintf( fpOut, "%2.1lf%c",
-		 RangedRand( 0.0, 5.0 ), j == m-1 ? '\n' : ' ' );
+  fprintf( fpOut, "%d %d %d\n", n, m, e);
+  for ( int i=0; i<e; ++i ) {
+    u = RangedRand(1.0, (double)n+1);
+    b = RangedRand(1.0, (double)m+1);
+    if(!list[u-1].searchList(b)){
+      if(b==col){
+	i--;
+	continue;
+      }
+      list[u-1].addData(b);
+    }else {
+      i--;
+      continue;
     }
+    fprintf( fpOut, "%d %d %2.1lf\n", u, b, RangedRand( 0.0, 5.0 ));
   }
   fclose( fpOut );
 }
 
 //i番目の人だけ全て未評価のデータ生成器
-void UnevaluatedUser( const char* filename, int n, int m, int user ) {
+void UnevaluatedUser( const char* filename, int n, int m, int e, int user ) {
+  int u, b; // userNo. & bookNo.
+  list.clear();
+  Makelist(n);
   FILE* fpOut = fopen( filename, "w" );
-  fprintf( fpOut, "%d %d\n", n, m );
-  for ( int i=0; i<n; ++i ) {
-    for ( int j=0; j<m; ++j ) {
-      if ( i == user )
-	fprintf( fpOut, "-1.0%c", j == m-1 ? '\n' : ' ' );
-      else
-	fprintf( fpOut, "%2.1lf%c",
-		 RangedRand( 0.0, 5.0 ), j == m-1 ? '\n' : ' ' );
+  fprintf( fpOut, "%d %d %d\n", n, m, e);
+  for ( int i=0; i<e; ++i ) {
+    u = RangedRand(1.0, (double)n+1);
+    b = RangedRand(1.0, (double)m+1);
+    if(!list[u-1].searchList(b)){
+      if(u-1==user){
+	i--;
+	continue;
+      }
+      list[u-1].addData(b);
+    }else {
+      i--;
+      continue;
     }
+    fprintf( fpOut, "%d %d %2.1lf\n", u, b, RangedRand( 0.0, 5.0 ));
   }
   fclose( fpOut );
 }
-*/
+
 //mainから生成器を呼び出して、まとめてデータを作る
 int main() {
-  AscendingOrder( "in3-1", 10, 15, 100 );
-  NoOrder( "in3-2", 10000, 10000, 10000 );
-  //UnevaluatedColumn( "in3-3", 10, 15, 3 );
-  //UnevaluatedUser( "in3-4", 10, 15, 1);
+  //AscendingOrder( "in3-1", 10, 15, 100 );
+  NoOrder( "in3-1", 100000, 1500, 100000 ); // filename, Number of user, book, evaluate
+  UnevaluatedColumn( "in3-2", 10, 15, 100, 3 );
+  UnevaluatedUser( "in3-3", 10, 15, 100, 1);
   //EvaluatedOnly( "", 2, 1 );
   //Mixed( "03_min_02.in", 2, 1, 2 );
   //Mixed( "03_min_03.in", 2, 1, 2 );
