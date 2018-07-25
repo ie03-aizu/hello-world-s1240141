@@ -257,7 +257,7 @@ void merge(std::vector<Recitem>::iterator first, std::vector<Recitem>::iterator 
     Right.push_back( *(first+(M+i)) );
   }
 
-  Recitem item = Recitem();
+  Recitem item = Recitem(0, -1);
   Left.push_back(item);
   Right.push_back(item);
 
